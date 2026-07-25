@@ -4,6 +4,7 @@ import ssl
 import certifi
 import logging
 from websockets.asyncio.client import connect
+from app.connection_manager import ConnectionManager
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,7 +21,7 @@ decorated_url_tag = "/".join([symbol + "@aggTrade" for symbol in SYMBOLS])
 combined_stream = base_url + decorated_url_tag
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
-async def stream_trades():
+async def stream_trades(manager: ConnectionManager):
     async with connect(combined_stream, ssl=ssl_context) as websocket:
         logging.info("a websocket connection has been established.")
 
@@ -29,8 +30,11 @@ async def stream_trades():
             symbol = payload["data"]["s"]
             price = payload["data"]["p"]
             quantity = payload["data"]["q"]
+            trade = { "symbol": symbol, "price": price, "quantity": quantity }
 
+            await manager.broadcast(trade)
             logging.info("%s price=%s qty=%s", symbol, price, quantity)
 
 if __name__ == "__main__":
-    asyncio.run(stream_trades())
+    manager = ConnectionManager()
+    asyncio.run(stream_trades(manager))

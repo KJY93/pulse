@@ -1,8 +1,19 @@
 from app.connection_manager import ConnectionManager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from contextlib import asynccontextmanager
+from app.binance_client import stream_trades
+import asyncio
 
-app = FastAPI()
+
 manager = ConnectionManager()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    task = asyncio.create_task(stream_trades(manager))
+    yield
+    task.cancel()
+
+app = FastAPI(lifespan=lifespan)
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
