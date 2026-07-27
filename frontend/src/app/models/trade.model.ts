@@ -1,5 +1,5 @@
 export interface Trade {
     symbol: string;
-    price: string;
-    quantity: string;
+    price: number;
+    quantity: number;
 }

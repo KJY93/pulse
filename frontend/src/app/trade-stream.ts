@@ -1,11 +1,18 @@
 import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { Trade } from './models/trade.model';
+import { map, Observable } from 'rxjs';
+import { RawTrade } from './models/trade-raw.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TradeStreamService {
-  private socket$: WebSocketSubject<Trade> = webSocket('ws://localhost:8000/ws');
-  trade$ = this.socket$.asObservable();
+  private socket$: WebSocketSubject<RawTrade> = webSocket('ws://localhost:8000/ws');
+  trade$: Observable<Trade> = this.socket$.asObservable()
+    .pipe(map(payload => ({
+      symbol: payload.symbol,
+      price: +payload.price,
+      quantity: +payload.quantity
+    })))
 }
