@@ -1,9 +1,9 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { TradeTable } from './trade-table/trade-table';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [TradeTable],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import { TradeStreamService } from '../trade-stream';
 import { inject } from '@angular/core';
 import { TradeRow } from '../models/trade-row.model';
 import { scan } from 'rxjs/operators';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-trade-table',
@@ -25,5 +26,11 @@ export class TradeTable {
       };
       return { ...acc, [curr.symbol]: newRow };
     }, {} as Record<string, TradeRow>)
-  )
+  );
+  
+  private tradeTableSignal = toSignal(this.table$, {
+    initialValue: {} as Record<string, TradeRow> 
+  });
+
+  tradeTableSignalArray = computed<TradeRow[]>(() => Object.values(this.tradeTableSignal()));
 }

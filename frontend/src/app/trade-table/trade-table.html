@@ -1,1 +1,24 @@
-<p>trade-table works!</p>
+<div>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Previous Price</th>
+                <th>Current Price</th>
+                <th>Delta</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (trade of tradeTableSignalArray(); track trade.symbol) {
+                <tr>
+                    <td>{{ trade.symbol }}</td>
+                    <td>{{ trade.prevPrice }}</td>
+                    <td>{{ trade.currentPrice }}</td>
+                    <td [style.color]="trade.delta >= 0 ? 'green' : 'red'">{{ trade.delta >= 0 ? '▲' : '▼' }} {{ trade.delta }}</td>
+                    <td>{{ trade.quantity }}</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
