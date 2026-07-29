@@ -2,7 +2,7 @@ import { Component, computed } from '@angular/core';
 import { TradeStreamService } from '../trade-stream';
 import { inject } from '@angular/core';
 import { TradeRow } from '../models/trade-row.model';
-import { scan } from 'rxjs/operators';
+import { scan, auditTime } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -25,7 +25,8 @@ export class TradeTable {
         quantity: curr.quantity,
       };
       return { ...acc, [curr.symbol]: newRow };
-    }, {} as Record<string, TradeRow>)
+    }, {} as Record<string, TradeRow>),
+    auditTime(500)
   );
   
   private tradeTableSignal = toSignal(this.table$, {
