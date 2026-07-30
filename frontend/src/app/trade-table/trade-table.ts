@@ -4,6 +4,7 @@ import { inject } from '@angular/core';
 import { TradeRow } from '../models/trade-row.model';
 import { scan, auditTime } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { scanTradeTable } from '../trade-table.logic';
 
 @Component({
   selector: 'app-trade-table',
@@ -14,18 +15,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class TradeTable {
   private tradeStreamService = inject(TradeStreamService);
   private table$ = this.tradeStreamService.trade$.pipe(
-    scan((acc, curr) => {
-      const existing = acc[curr.symbol];
-      const prevPrice = existing ? existing.currentPrice : curr.price;
-      const newRow: TradeRow = {
-        symbol: curr.symbol,
-        currentPrice: curr.price,
-        prevPrice: prevPrice,
-        delta: curr.price - prevPrice,
-        quantity: curr.quantity,
-      };
-      return { ...acc, [curr.symbol]: newRow };
-    }, {} as Record<string, TradeRow>),
+    scan(scanTradeTable, {} as Record<string, TradeRow>),
     auditTime(500)
   );
   

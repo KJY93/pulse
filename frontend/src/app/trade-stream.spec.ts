@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { TradeStream } from './trade-stream';
+import { TradeStreamService } from './trade-stream';
 
 describe('TradeStream', () => {
-  let service: TradeStream;
+  let service: TradeStreamService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(TradeStream);
+    service = TestBed.inject(TradeStreamService);
   });
 
   it('should be created', () => {
