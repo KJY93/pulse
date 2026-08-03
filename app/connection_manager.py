@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import WebSocket
 
 class ConnectionManager:
@@ -14,14 +16,16 @@ class ConnectionManager:
 
     async def broadcast(self, message: dict):
         fail_connections: set[WebSocket] = set()
+        connections = list(self.active_connections)
 
+        tasks = [asyncio.wait_for(conn.send_json(message), timeout=500) for conn in connections]
 
-        for connection in self.active_connections:
-            try:
-                await connection.send_json(message)
-            except Exception:
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        for connection, result in zip(connections, results):
+            if isinstance(result, Exception):
                 fail_connections.add(connection)
-
+            
         for fail_connection in fail_connections:
             self.disconnect(fail_connection)
 
