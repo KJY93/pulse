@@ -6,19 +6,15 @@ import logging
 from websockets.asyncio.client import connect
 from app.connection_manager import ConnectionManager
 from websockets.exceptions import ConnectionClosed
+from app.symbols import SYMBOLS
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(message)s"
 )
 
-SYMBOLS = [
-    "btcusdt", "ethusdt", "bnbusdt", "solusdt", "xrpusdt",
-    "adausdt", "dogeusdt", "avaxusdt", "dotusdt", "linkusdt"
-]
-
 base_url = "wss://stream.binance.com:9443/stream?streams="
-decorated_url_tag = "/".join([symbol + "@aggTrade" for symbol in SYMBOLS])
+decorated_url_tag = "/".join([symbol.lower() + "@aggTrade" for symbol in SYMBOLS])
 combined_stream = base_url + decorated_url_tag
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
@@ -40,5 +36,5 @@ async def stream_trades(manager: ConnectionManager):
 
 
 if __name__ == "__main__":
-    manager = ConnectionManager()
+    manager = ConnectionManager(SYMBOLS)
     asyncio.run(stream_trades(manager))

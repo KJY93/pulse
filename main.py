@@ -3,9 +3,10 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from contextlib import asynccontextmanager
 from app.binance_client import stream_trades
 import asyncio
+from app.symbols import SYMBOLS
 
 
-manager = ConnectionManager()
+manager = ConnectionManager(SYMBOLS)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
