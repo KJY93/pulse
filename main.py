@@ -3,6 +3,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from contextlib import asynccontextmanager
 from app.binance_client import stream_trades
 import asyncio
+import json
 from app.symbols import SYMBOLS
 
 
@@ -22,6 +23,8 @@ async def websocket_endpoint(websocket: WebSocket):
 
     try:
         while True:
-            await websocket.receive_text()
+            subcription_payload = json.loads(await websocket.receive_text())
+            symbols = subcription_payload["symbols"]
+            manager.update_subscription(websocket, symbols)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
