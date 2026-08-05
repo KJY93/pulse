@@ -8,11 +8,16 @@ import { RawTrade } from './models/trade-raw.model';
   providedIn: 'root',
 })
 export class TradeStreamService {
-  private socket$: WebSocketSubject<RawTrade> = webSocket('ws://localhost:8000/ws');
+  private socket$: WebSocketSubject<any> = webSocket('ws://localhost:8000/ws');
+  
   trade$: Observable<Trade> = this.socket$.asObservable()
-    .pipe(map(payload => ({
+    .pipe(map((payload: RawTrade) => ({
       symbol: payload.symbol,
       price: +payload.price,
       quantity: +payload.quantity
-    })))
+    })));
+
+  updateSubscription(symbols: string[]) {
+    this.socket$.next({ symbols })
+  }
 }
