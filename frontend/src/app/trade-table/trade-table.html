@@ -1,4 +1,15 @@
 <div>
+    <div>
+        @for (symbol of availableSymbols; track symbol) {
+            <label>
+                <input 
+                    type="checkbox"
+                    [checked]="checkedSymbols().has(symbol)"
+                    (change)="onCheckBoxChange(symbol, $event)">
+                    {{ symbol }}
+            </label>
+        }
+    </div>
     <table>
         <thead>
             <tr>

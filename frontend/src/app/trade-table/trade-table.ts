@@ -1,10 +1,13 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, Signal, signal, WritableSignal } from '@angular/core';
 import { TradeStreamService } from '../trade-stream';
 import { inject } from '@angular/core';
 import { TradeRow } from '../models/trade-row.model';
 import { scan, auditTime } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { scanTradeTable } from '../trade-table.logic';
+import { SYMBOLS } from '../symbols';
+import { Observable } from 'rxjs';
+
 
 @Component({
   selector: 'app-trade-table',
@@ -13,8 +16,10 @@ import { scanTradeTable } from '../trade-table.logic';
   styleUrl: './trade-table.css',
 })
 export class TradeTable {
-  private tradeStreamService = inject(TradeStreamService);
-  private table$ = this.tradeStreamService.trade$.pipe(
+  availableSymbols: string[] = SYMBOLS;
+  checkedSymbols: WritableSignal<Set<string>> = signal<Set<string>> (new Set(this.availableSymbols));
+  private tradeStreamService: TradeStreamService = inject(TradeStreamService);
+  private table$: Observable<Record<string, TradeRow>> = this.tradeStreamService.trade$.pipe(
     scan(scanTradeTable, {} as Record<string, TradeRow>),
     auditTime(500)
   );
@@ -23,5 +28,20 @@ export class TradeTable {
     initialValue: {} as Record<string, TradeRow> 
   });
 
-  tradeTableSignalArray = computed<TradeRow[]>(() => Object.values(this.tradeTableSignal()));
+  tradeTableSignalArray: Signal<TradeRow[]> = computed<TradeRow[]>(() => Object.values(this.tradeTableSignal()).filter(row => this.checkedSymbols().has(row.symbol)));
+
+  onCheckBoxChange(symbol: string, event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked
+    const updated = new Set(this.checkedSymbols())
+
+    if (isChecked) {
+      updated.add(symbol);
+    }
+    else {
+      updated.delete(symbol);
+    }
+
+    this.checkedSymbols.set(updated);
+    this.tradeStreamService.updateSubscription(Array.from(updated));
+  }
 }
