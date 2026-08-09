@@ -34,7 +34,14 @@ async def stream_trades(manager: ConnectionManager):
             logging.warning("Connection closed: %s", e)
             continue
 
+async def stream_trades_infinite_run(manager: ConnectionManager):
+    while True:
+        try:
+            await stream_trades(manager)
+        except Exception as e:
+            logging.error("An error occured %s", e)
+        await asyncio.sleep(2)
 
 if __name__ == "__main__":
     manager = ConnectionManager(SYMBOLS)
-    asyncio.run(stream_trades(manager))
+    asyncio.run(stream_trades_infinite_run(manager))
