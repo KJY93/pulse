@@ -32,16 +32,21 @@ export class TradeTable {
 
   onCheckBoxChange(symbol: string, event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked
-    const updated = new Set(this.checkedSymbols())
+ 
+    this.checkedSymbols.update(
+      (currentSet) => {
+        const updated = new Set(currentSet);
+        if (isChecked) {
+          updated.add(symbol);
+        }
+        else {
+          updated.delete(symbol);
+        }
+        return updated
+      }
+    )
 
-    if (isChecked) {
-      updated.add(symbol);
-    }
-    else {
-      updated.delete(symbol);
-    }
 
-    this.checkedSymbols.set(updated);
-    this.tradeStreamService.updateSubscription(Array.from(updated));
+    this.tradeStreamService.updateSubscription(Array.from(this.checkedSymbols()));
   }
 }
