@@ -10,8 +10,10 @@
             </label>
         }
     </div>
-    <table>
-        <thead>
+
+
+    <p-table [value]="tradeTableSignalArray()" [tableStyle]="{ 'min-width': '50rem' }">
+        <ng-template #header>
             <tr>
                 <th>Symbol</th>
                 <th>Previous Price</th>
@@ -19,17 +21,15 @@
                 <th>Delta</th>
                 <th>Quantity</th>
             </tr>
-        </thead>
-        <tbody>
-            @for (trade of tradeTableSignalArray(); track trade.symbol) {
-                <tr>
-                    <td>{{ trade.symbol }}</td>
-                    <td>{{ trade.prevPrice.toFixed(4) }}</td>
-                    <td>{{ trade.currentPrice.toFixed(4) }}</td>
-                    <td [style.color]="trade.delta >= 0 ? 'green' : 'red'">{{ trade.delta >= 0 ? '▲' : '▼' }} {{ trade.delta.toFixed(4) }}</td>
-                    <td>{{ trade.quantity.toFixed(4) }}</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+        </ng-template>
+        <ng-template #body let-trade>
+            <tr>
+                <td>{{ trade.symbol }}</td>
+                <td>{{ trade.prevPrice.toFixed(4) }}</td>
+                <td>{{ trade.currentPrice.toFixed(4) }}</td>
+                <td [style.color]="trade.delta >= 0 ? 'green' : 'red'">{{ trade.delta >= 0 ? '▲' : '▼' }} {{ trade.delta.toFixed(4) }}</td>
+                <td>{{ trade.quantity.toFixed(4) }}</td>
+            </tr>
+        </ng-template>
+    </p-table>
 </div>

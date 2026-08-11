@@ -14,10 +14,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { scanTradeTable } from '../trade-table.logic';
 import { SYMBOLS } from '../symbols';
 import { Observable } from 'rxjs';
+import { TableModule } from 'primeng/table';
 
 @Component({
   selector: 'app-trade-table',
-  imports: [],
+  imports: [TableModule],
   templateUrl: './trade-table.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './trade-table.css',
