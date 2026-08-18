@@ -4,8 +4,8 @@ from contextlib import asynccontextmanager
 from app.binance_client import stream_trades_infinite_run
 import asyncio
 import json
+import logging
 from app.symbols import SYMBOLS
-
 
 manager = ConnectionManager(SYMBOLS)
 
@@ -23,8 +23,19 @@ async def websocket_endpoint(websocket: WebSocket):
 
     try:
         while True:
-            subcription_payload = json.loads(await websocket.receive_text())
-            symbols = subcription_payload["symbols"]
-            manager.update_subscription(websocket, symbols)
+            try:
+                subcription_payload = json.loads(await websocket.receive_text())
+                symbols = subcription_payload["symbols"]
+
+                if isinstance(symbols, list):
+                    manager.update_subscription(websocket, symbols)
+                else:
+                    logging.warning("symbols received is not in a list")
+            except KeyError:
+                logging.warning("invalid payload, missing symbols field")
+            except json.JSONDecodeError:
+                logging.warning("invalid payload format (not in JSON)")
+            except Exception as e:
+                logging.warning("an error has occured: %s", e)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
