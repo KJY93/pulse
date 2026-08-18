@@ -1,13 +1,8 @@
 <div>
     <div>
         @for (symbol of availableSymbols; track symbol) {
-            <label>
-                <input 
-                    type="checkbox"
-                    [checked]="checkedSymbols().has(symbol)"
-                    (change)="onCheckBoxChange(symbol, $event)">
-                    {{ symbol }}
-            </label>
+            <label pLabel [for]="symbol" class="text-sm">{{ symbol }}</label>
+            <p-checkbox [inputId]="symbol" name="group" [value]="symbol" [(ngModel)]="checkedSymbols" />
         }
     </div>
 

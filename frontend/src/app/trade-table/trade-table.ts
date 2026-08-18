@@ -5,6 +5,7 @@ import {
   signal,
   WritableSignal,
   ChangeDetectionStrategy,
+  effect,
 } from '@angular/core';
 import { TradeStreamService } from '../trade-stream';
 import { inject } from '@angular/core';
@@ -15,18 +16,29 @@ import { scanTradeTable } from '../trade-table.logic';
 import { SYMBOLS } from '../symbols';
 import { Observable } from 'rxjs';
 import { TableModule } from 'primeng/table';
+import { CheckboxModule } from 'primeng/checkbox';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-trade-table',
-  imports: [TableModule],
+  imports: [TableModule, CheckboxModule, FormsModule],
   templateUrl: './trade-table.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './trade-table.css',
 })
 export class TradeTable {
+
+  constructor() {
+    effect(() => {
+      this.tradeStreamService.updateSubscription(this.checkedSymbols());
+    });
+  }
+
   availableSymbols: string[] = SYMBOLS;
-  checkedSymbols: WritableSignal<Set<string>> = signal<Set<string>>(new Set(this.availableSymbols));
+  checkedSymbols: WritableSignal<string[]> = signal<string[]>([...this.availableSymbols]);
   private tradeStreamService: TradeStreamService = inject(TradeStreamService);
+
+
   private table$: Observable<Record<string, TradeRow>> = this.tradeStreamService.trade$.pipe(
     scan(scanTradeTable, {} as Record<string, TradeRow>),
     auditTime(500),
@@ -37,22 +49,20 @@ export class TradeTable {
   });
 
   tradeTableSignalArray: Signal<TradeRow[]> = computed<TradeRow[]>(() =>
-    Object.values(this.tradeTableSignal()).filter((row) => this.checkedSymbols().has(row.symbol)),
+    Object.values(this.tradeTableSignal()).filter((row) => this.checkedSymbols().includes(row.symbol)),
   );
 
   onCheckBoxChange(symbol: string, event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
 
-    this.checkedSymbols.update((currentSet) => {
-      const updated = new Set(currentSet);
+    this.checkedSymbols.update((current) => {
       if (isChecked) {
-        updated.add(symbol);
+        return current.includes(symbol) ? current : [...current, symbol]
       } else {
-        updated.delete(symbol);
+        return current.filter((s) => s !== symbol);
       }
-      return updated;
     });
 
-    this.tradeStreamService.updateSubscription(Array.from(this.checkedSymbols()));
+    this.tradeStreamService.updateSubscription(this.checkedSymbols());
   }
 }

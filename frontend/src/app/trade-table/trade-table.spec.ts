@@ -16,7 +16,7 @@ describe('TradeTable', () => {
 
     await TestBed.configureTestingModule({
       imports: [TradeTable],
-      providers: [ { provide: TradeStreamService, useValue: { trade$: fakeTradeSubject } } ]
+      providers: [ { provide: TradeStreamService, useValue: { trade$: fakeTradeSubject, updateSubscription: () => {} } } ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TradeTable);
