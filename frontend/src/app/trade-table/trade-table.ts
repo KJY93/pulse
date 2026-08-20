@@ -10,8 +10,8 @@ import {
 import { TradeStreamService } from '../trade-stream';
 import { inject } from '@angular/core';
 import { TradeRow } from '../models/trade-row.model';
-import { scan, auditTime } from 'rxjs/operators';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { scan, auditTime, debounceTime } from 'rxjs/operators';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { scanTradeTable } from '../trade-table.logic';
 import { SYMBOLS } from '../symbols';
 import { Observable } from 'rxjs';
@@ -30,7 +30,7 @@ export class TradeTable {
 
   constructor() {
     effect(() => {
-      this.tradeStreamService.updateSubscription(this.checkedSymbols());
+      this.tradeStreamService.updateSubscription(this.debouncedCheckedSymbols());
     });
   }
 
@@ -38,6 +38,10 @@ export class TradeTable {
   checkedSymbols: WritableSignal<string[]> = signal<string[]>([...this.availableSymbols]);
   private tradeStreamService: TradeStreamService = inject(TradeStreamService);
 
+  private debouncedCheckedSymbols = toSignal(
+    toObservable(this.checkedSymbols).pipe(debounceTime(500)),
+    {initialValue: this.checkedSymbols() }
+  )
 
   private table$: Observable<Record<string, TradeRow>> = this.tradeStreamService.trade$.pipe(
     scan(scanTradeTable, {} as Record<string, TradeRow>),
@@ -49,7 +53,7 @@ export class TradeTable {
   });
 
   tradeTableSignalArray: Signal<TradeRow[]> = computed<TradeRow[]>(() =>
-    Object.values(this.tradeTableSignal()).filter((row) => this.checkedSymbols().includes(row.symbol)),
+    Object.values(this.tradeTableSignal()).filter((row) => this.debouncedCheckedSymbols().includes(row.symbol)),
   );
 
   onCheckBoxChange(symbol: string, event: Event) {
@@ -62,7 +66,5 @@ export class TradeTable {
         return current.filter((s) => s !== symbol);
       }
     });
-
-    this.tradeStreamService.updateSubscription(this.checkedSymbols());
   }
 }
