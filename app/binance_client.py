@@ -29,7 +29,7 @@ async def stream_trades(manager: ConnectionManager):
                 trade = { "symbol": symbol, "price": price, "quantity": quantity }
 
                 await manager.broadcast(trade)
-                logging.info("%s price=%s qty=%s", symbol, price, quantity)
+                # logging.info("%s price=%s qty=%s", symbol, price, quantity)
         except ConnectionClosed as e:
             logging.warning("Connection closed: %s", e)
             continue
