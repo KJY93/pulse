@@ -9,26 +9,28 @@ describe('TradeTable', () => {
   let component: TradeTable;
   let fixture: ComponentFixture<TradeTable>;
   let fakeTradeSubject: Subject<Trade>;
+  let fakeNotificationSubject: Subject<{ error: string, message: string }>
 
   beforeEach(async () => {
     fakeTradeSubject = new Subject();
+    fakeNotificationSubject = new Subject();
     vi.useFakeTimers();
 
     await TestBed.configureTestingModule({
       imports: [TradeTable],
-      providers: [ { provide: TradeStreamService, useValue: { trade$: fakeTradeSubject, updateSubscription: () => {} } } ]
+      providers: [{ provide: TradeStreamService, useValue: { trade$: fakeTradeSubject, updateSubscription: () => { }, rateLimitNotification$: fakeNotificationSubject } }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TradeTable);
     component = fixture.componentInstance;
 
-    await vi.runAllTimersAsync();    
+    await vi.runAllTimersAsync();
     await fixture.whenStable();
   });
 
   afterEach(() => {
-    vi.useRealTimers();                         
-  });  
+    vi.useRealTimers();
+  });
 
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -53,4 +55,20 @@ describe('TradeTable', () => {
       }
     ])
   })
+
+  it('should show a rate limit notification, then clear it after 3 seconds', async () => {
+    fakeNotificationSubject.next({
+      error: "limit reached",
+      message: "too many requests"
+    });
+
+    expect(component.rateLimitMessage()).toEqual({
+      error: "limit reached",
+      message: "too many requests"     
+    })
+
+    await vi.advanceTimersByTimeAsync(3001); 
+
+    expect(component.rateLimitMessage()).toEqual(null)
+  });
 });

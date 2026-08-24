@@ -1,8 +1,16 @@
 <div>
+
+    @if (rateLimitMessage(); as notice) {
+    <div>
+        Rate limit reached — your subscription change didn't take effect.
+        Your previous selection is still active. Please wait a moment and try again.
+    </div>
+    }
+
     <div>
         @for (symbol of availableSymbols; track symbol) {
-            <label pLabel [for]="symbol" class="text-sm">{{ symbol }}</label>
-            <p-checkbox [inputId]="symbol" name="group" [value]="symbol" [(ngModel)]="checkedSymbols" />
+        <label pLabel [for]="symbol" class="text-sm">{{ symbol }}</label>
+        <p-checkbox [inputId]="symbol" name="group" [value]="symbol" [(ngModel)]="checkedSymbols" />
         }
     </div>
 
@@ -22,7 +30,8 @@
                 <td>{{ trade.symbol }}</td>
                 <td>{{ trade.prevPrice.toFixed(4) }}</td>
                 <td>{{ trade.currentPrice.toFixed(4) }}</td>
-                <td [style.color]="trade.delta >= 0 ? 'green' : 'red'">{{ trade.delta >= 0 ? '▲' : '▼' }} {{ trade.delta.toFixed(4) }}</td>
+                <td [style.color]="trade.delta >= 0 ? 'green' : 'red'">{{ trade.delta >= 0 ? '▲' : '▼' }} {{
+                    trade.delta.toFixed(4) }}</td>
                 <td>{{ trade.quantity.toFixed(4) }}</td>
             </tr>
         </ng-template>
